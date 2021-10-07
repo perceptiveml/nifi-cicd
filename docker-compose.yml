@@ -1,0 +1,81 @@
+version: '3.8'
+services:
+  zookeeper-dev:
+    image: 'bitnami/zookeeper:latest'
+    hostname: zookeeper-dev
+    container_name: zookeeper-dev
+    networks:
+      - dev-env
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  zookeeper-test:
+    image: 'bitnami/zookeeper:latest'
+    hostname: zookeeper-test
+    container_name: zookeeper-test
+    networks:
+      - test-env
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  nifi-dev:
+    image: "apache/nifi:latest"
+    networks:
+      - dev-env
+    ports:
+      - "9000:9000"
+    container_name: nifi-dev
+    environment:
+      - NIFI_WEB_HTTP_PORT=9000
+      - NIFI_ZK_CONNECT_STRING=zookeeper-dev:2181
+
+  nifi-test:
+    image: "apache/nifi:latest"
+    networks:
+      - test-env
+    ports:
+      - "9001:9000"
+    container_name: nifi-test
+    environment:
+      - NIFI_WEB_HTTP_PORT=9000
+      - NIFI_ZK_CONNECT_STRING=zookeeper-test:2181
+
+  nifi-registry-dev:
+    image: 'michalklempa/nifi-registry:latest'
+    networks:
+      - dev-env
+    ports:
+      - "18080:18080"
+    container_name: nifi-registry-dev
+    environment:
+      - FLOW_PROVIDER=git
+      - GIT_REMOTE_URL=<insert URL to GIT repository>
+      - FLOW_PROVIDER_GIT_FLOW_STORAGE_DIRECTORY=/opt/nifi-registry/flow-storage-git
+      - GIT_CHECKOUT_BRANCH=main
+      - FLOW_PROVIDER_GIT_REMOTE_TO_PUSH=origin
+      - FLOW_PROVIDER_GIT_REMOTE_ACCESS_USER=<insert GIT username>
+      - FLOW_PROVIDER_GIT_REMOTE_ACCESS_PASSWORD=<insert access password>
+      - GIT_CONFIG_USER_NAME=<insert Git user name>
+      - GIT_CONFIG_USER_EMAIL=<insert Git user email>
+
+  nifi-registry-test:
+    image: 'michalklempa/nifi-registry:latest'
+    networks:
+      - test-env
+    ports:
+      - "18081:18080"
+    container_name: nifi-registry-test
+    environment:
+      - FLOW_PROVIDER=git
+      - GIT_REMOTE_URL=<insert URL to GIT repository>
+      - FLOW_PROVIDER_GIT_FLOW_STORAGE_DIRECTORY=/opt/nifi-registry/flow-storage-git
+      - GIT_CHECKOUT_BRANCH=main
+      - FLOW_PROVIDER_GIT_REMOTE_TO_PUSH=origin
+      - FLOW_PROVIDER_GIT_REMOTE_ACCESS_USER=<insert GIT username>
+      - FLOW_PROVIDER_GIT_REMOTE_ACCESS_PASSWORD=<insert access password>
+      - GIT_CONFIG_USER_NAME=<insert Git user name>
+      - GIT_CONFIG_USER_EMAIL=<insert Git user email>
+
+networks:
+  dev-env:
+  test-env:
